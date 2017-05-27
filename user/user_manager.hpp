@@ -8,20 +8,23 @@
 #include "room.hpp"
 #include "room_manager.hpp"
 
+
 class UserManager
 {
 public:
 
-    UserManager(RoomManager* manager)
+    typedef std::unique_ptr<UserManager> Ptr;
+    
+    UserManager(RoomManager& manager)
         :roomManager(manager){}
-    void createUser(std::string pseudo);
+    void createUser(std::string pseudo,tcp::socket&& socket);
     void deleteUser(std::string pseudo);
     void joinRoom(std::string roomName, std::string user);
     void quitRoom(std::string roomName, std::string user);
 
     // private:
 
-    RoomManager* roomManager;
+    RoomManager& roomManager;
     std::map<std::string, std::shared_ptr<User> > users;
 
 };

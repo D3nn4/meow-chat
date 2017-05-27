@@ -13,6 +13,8 @@ class RoomManager
 {
 public:
 
+    typedef std::unique_ptr<RoomManager> Ptr;
+    
     void createRoom(std::string name, std::string creator);
     void deleteRoom(std::string name);
     void addUser(std::string name, std::string newUser);

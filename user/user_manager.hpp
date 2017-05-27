@@ -6,18 +6,22 @@
 #include <memory>
 #include "user.hpp"
 #include "room.hpp"
+#include "room_manager.hpp"
 
 class UserManager
 {
 public:
 
-    void createUser(std::string name);
-    void deleteUser(std::string name);
-    void joinRoom(std::string roomName, User user);
-    void quitRoom(std::string roomName, User user);
+    UserManager(RoomManager* manager)
+        :roomManager(manager){}
+    void createUser(std::string pseudo);
+    void deleteUser(std::string pseudo);
+    void joinRoom(std::string roomName, std::string user);
+    void quitRoom(std::string roomName, std::string user);
 
     // private:
 
+    RoomManager* roomManager;
     std::map<std::string, std::shared_ptr<User> > users;
 
 };

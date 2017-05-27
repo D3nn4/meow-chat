@@ -2,7 +2,9 @@ NAME = meowChat
 
 SRC =	main.cpp \
 			./room/room_manager.cpp \
-			./room/room_manager.t.cpp 
+			./room/room_manager.t.cpp \
+			./user/user_manager.cpp \
+			./user/user_manager.t.cpp
 
 HEADER =-I/home/me/googletest/include \
 				-I ./room \

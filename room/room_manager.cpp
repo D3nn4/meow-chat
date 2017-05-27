@@ -1,13 +1,11 @@
 #include <string>
-#include <iostream>
-#include <vector>
 #include "room_manager.hpp"
 #include <memory>
 
-void RoomManager::createRoom(std::string name, User creator)
+void RoomManager::createRoom(std::string name, std::string creator)
 {
     if(rooms.find(name) == rooms.end()){
-        std::shared_ptr<Room> ptr(new Room);
+        std::shared_ptr<Room> ptr= std::make_shared<Room>();
         ptr->name = name;
         rooms[name] = ptr;
         // creator.roleByServ[name] = User::Role::ADMIN;
@@ -22,7 +20,7 @@ void RoomManager::deleteRoom(std::string name)
     rooms.erase(name);
 }
 
-void RoomManager::addUser(std::string name, User newUser)
+void RoomManager::addUser(std::string name, std::string newUser)
 {
     std::shared_ptr<Room> room = rooms[name];
     // if(room.banList.find(newUser.pseudo) != room.banList.end()){
@@ -32,14 +30,13 @@ void RoomManager::addUser(std::string name, User newUser)
     // if(newUser.roleByServ.find(name) == newUser.roleByServ.end()){
     //     newUser.roleByServ[name] = User::Role::USER;
     // }
-    if(room->userList.find(newUser.pseudo) == room->userList.end()){
-        // newUser.joinedRooms[name] = room; //to do in user
-        room->userList[newUser.pseudo] = newUser;
+    if(room->userList.find(newUser) == room->userList.end()){
+        room->userList.insert(newUser);
     }
 }
 
-void RoomManager::removeUser(std::string name, User user)
+void RoomManager::removeUser(std::string name, std::string user)
 {
     // user.joinedRooms.erase(name); //to do in user
-    rooms[name]->userList.erase(user.pseudo);
+    rooms[name]->userList.erase(rooms[name]->userList.find(user));
 }

@@ -4,13 +4,14 @@
 #include "user_manager.hpp"
 
 
-void UserManager::createUser(std::string pseudo,tcp::socket&& socket)
+User::Ptr UserManager::createUser(std::string pseudo,tcp::socket&& socket)
 {
     // if(users.find(name) == users.end()){
-    std::shared_ptr<User> ptr = std::make_shared<User>(pseudo, std::move(socket));
-        users[pseudo] = ptr;
-        joinRoom("default", pseudo);
-        std::cout << ptr->pseudo << "joined\n";
+    User::Ptr ptr = std::make_shared<User>(pseudo, std::move(socket));
+    users[pseudo] = ptr;
+    joinRoom("default", pseudo);
+    std::cout << ptr->pseudo << "joined\n";
+    return ptr;
     // }
 }
 

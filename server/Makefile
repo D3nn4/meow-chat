@@ -7,7 +7,8 @@ SRC =	main.cpp \
 			../user/user_manager.cpp
 
 HEADER = -I../user \
-				-I../room
+				-I../room \
+				-I../include
 OBJDIR =
 
 all : $(NAME)

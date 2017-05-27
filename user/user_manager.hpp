@@ -17,7 +17,7 @@ public:
     
     UserManager(RoomManager& manager)
         :roomManager(manager){}
-    void createUser(std::string pseudo,tcp::socket&& socket);
+    User::Ptr createUser(std::string pseudo,tcp::socket&& socket);
     void deleteUser(std::string pseudo);
     void joinRoom(std::string roomName, std::string user);
     void quitRoom(std::string roomName, std::string user);

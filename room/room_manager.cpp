@@ -2,6 +2,13 @@
 #include "room_manager.hpp"
 #include <memory>
 
+RoomManager::RoomManager()
+{
+    std::shared_ptr<Room> ptr= std::make_shared<Room>();
+    ptr->name = "default";
+    rooms["default"] = ptr;
+}
+
 void RoomManager::createRoom(std::string name, std::string creator)
 {
     if(rooms.find(name) == rooms.end()){
@@ -17,7 +24,9 @@ void RoomManager::deleteRoom(std::string name)
 {
     //"Are you sure" pop-up
     //add admin
-    rooms.erase(name);
+    if(name.compare("default") != 0) {
+        rooms.erase(name);
+    }
 }
 
 void RoomManager::addUser(std::string name, std::string newUser)
@@ -30,8 +39,17 @@ void RoomManager::addUser(std::string name, std::string newUser)
     // if(newUser.roleByServ.find(name) == newUser.roleByServ.end()){
     //     newUser.roleByServ[name] = User::Role::USER;
     // }
-    if(room->userList.find(newUser) == room->userList.end()){
-        room->userList.insert(newUser);
+    if(rooms.find(name) != rooms.end()) {
+        if(room->userList.find(newUser) == room->userList.end()){
+            room->userList.insert(newUser);
+            std::cout << newUser << " joined " << name << " room.\n";
+        }
+        else{
+            std::cout << "User " << newUser << " already in room.\n";
+        }
+    }
+    else{
+        std::cout << "Room " << name << " do not exist.\n";
     }
 }
 

@@ -1,7 +1,8 @@
 
 NAME = server
 
-SRC =	server.cpp \
+SRC =	main.cpp \
+			server.cpp \
 			../room/room_manager.cpp \
 			../user/user_manager.cpp
 

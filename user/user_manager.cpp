@@ -9,6 +9,7 @@ void UserManager::createUser(std::string pseudo,tcp::socket&& socket)
     // if(users.find(name) == users.end()){
     std::shared_ptr<User> ptr = std::make_shared<User>(pseudo, std::move(socket));
         users[pseudo] = ptr;
+        joinRoom("default", pseudo);
         std::cout << ptr->pseudo << "joined\n";
     // }
 }
@@ -20,8 +21,14 @@ void UserManager::deleteUser(std::string pseudo)
 
 void UserManager::joinRoom(std::string roomName, std::string user)
 {
-    users[user]->joinedRooms.insert(roomName);
-    roomManager.addUser(roomName, user);
+    auto it = users.find(user);
+    if(it != users.end()){
+        it->second->joinedRooms.insert(roomName);
+        roomManager.addUser(roomName, user);
+    }
+    else{
+        std::cout << "ERROR: user " << user << " not find.\n";
+    }
 }
 
 void UserManager::quitRoom(std::string roomName, std::string user)

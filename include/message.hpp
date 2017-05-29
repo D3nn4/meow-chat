@@ -41,13 +41,17 @@ struct Message
         encodedMsg = buff;
         std::vector<std::string> strs;
         boost::split(strs,encodedMsg,boost::is_any_of("/"));
-        room = strs[1];
-        sender = strs[2];
-        msg = strs[3];
-        if(strs.size() > 4) {
-            for(size_t i = 4; i < strs.size(); i++){
-                msg += "/";
-                msg += strs[i];
+        if(!encodedMsg.empty()
+           && !strs.empty()
+           && strs.size() > 3) {
+            room = strs[1];
+            sender = strs[2];
+            msg = strs[3];
+            if(strs.size() > 4) {
+                for(size_t i = 4; i < strs.size(); i++){
+                    msg += "/";
+                    msg += strs[i];
+                }
             }
         }
     }

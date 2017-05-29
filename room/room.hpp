@@ -7,6 +7,7 @@
 
 struct Room
 {
+    typedef std::shared_ptr<Room> Ptr;
     std::string name;
     std::set<std::string> userList;
     // std::map<std::string, User> banList;

@@ -4,11 +4,9 @@
 #include <string>
 #include <set>
 #include <boost/asio.hpp>
-#include "room.hpp"
 #include "message.hpp"
 
 using boost::asio::ip::tcp;
-struct Room;
 
 struct User
 {

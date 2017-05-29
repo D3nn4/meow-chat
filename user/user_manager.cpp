@@ -10,7 +10,6 @@ User::Ptr UserManager::createUser(std::string pseudo,tcp::socket&& socket)
     User::Ptr ptr = std::make_shared<User>(pseudo, std::move(socket));
     users[pseudo] = ptr;
     joinRoom("default", pseudo);
-    std::cout << ptr->pseudo << "joined\n";
     return ptr;
     // }
 }

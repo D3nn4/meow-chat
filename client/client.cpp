@@ -3,30 +3,33 @@
 #include <iostream>
 #include <thread>
 #include <boost/asio.hpp>
-
-using boost::asio::ip::tcp;
+#include "user.hpp"
 
 class Client
 {
+    typedef std::deque<Message> messageQueue;
+
 public:
+    
+    std::string pseudo;
   Client(boost::asio::io_service& io_service,
       tcp::resolver::iterator endpoint_iterator)
     : io_service_(io_service),
       socket_(io_service)
   {
-    _connect(endpoint_iterator);
+    connect(endpoint_iterator);
   }
 
-  void write(const chat_message& msg)
+  void write(const Message& msg)
   {
     io_service_.post(
         [this, msg]()
         {
-          bool write_in_progress = !write_msgs_.empty();
-          write_msgs_.push_back(msg);
-          if (!write_in_progress)
+          bool writeInProgress = !msgQueue_.empty();
+          msgQueue_.push_back(msg);
+          if (!writeInProgress)
           {
-            _write();
+            sendMsg();
           }
         });
   }
@@ -37,27 +40,27 @@ public:
   }
 
 private:
-  void _connect(tcp::resolver::iterator endpoint_iterator)
+  void connect(tcp::resolver::iterator endpoint_iterator)
   {
     boost::asio::async_connect(socket_, endpoint_iterator,
         [this](boost::system::error_code ec, tcp::resolver::iterator)
         {
           if (!ec)
           {
-            _getHeader();
+            readHeader();
           }
         });
   }
 
-  void _getHeader()
+  void readHeader()
   {
     boost::asio::async_read(socket_,
-        boost::asio::buffer(read_msg_.data(), chat_message::header_length),
+        boost::asio::buffer(msg_.buff, Message::headerLength),
         [this](boost::system::error_code ec, std::size_t /*length*/)
         {
-          if (!ec && read_msg_.decode_header())
+          if (!ec && msg_.decodeHeader())
           {
-            _getBody();
+            readBody();
           }
           else
           {
@@ -66,17 +69,20 @@ private:
         });
   }
 
-  void _getBody()
+  void readBody()
   {
     boost::asio::async_read(socket_,
-        boost::asio::buffer(read_msg_.body(), read_msg_.body_length()),
+        boost::asio::buffer(msg_.body(), msg_.bodyLength),
         [this](boost::system::error_code ec, std::size_t /*length*/)
         {
           if (!ec)
           {
-            std::cout.write(read_msg_.body(), read_msg_.body_length());
-            std::cout << "\n";
-            do_read_header();
+              msg_.decodeBody();
+              if(!msg_.msg.empty() /* && msg_.sender.compare(pseudo) != 0 */) {
+                  std::cout << msg_.sender << ": " << msg_.msg << std::endl;
+                  msg_.emptyMe();
+              }
+              readHeader();
           }
           else
           {
@@ -85,19 +91,19 @@ private:
         });
   }
 
-  void _write()
+  void sendMsg()
   {
     boost::asio::async_write(socket_,
-        boost::asio::buffer(write_msgs_.front().data(),
-          write_msgs_.front().length()),
+        boost::asio::buffer(msgQueue_.front().encodedMsg,
+                            msgQueue_.front().encodedMsg.size()),
         [this](boost::system::error_code ec, std::size_t /*length*/)
         {
           if (!ec)
           {
-            write_msgs_.pop_front();
-            if (!write_msgs_.empty())
+            msgQueue_.pop_front();
+            if (!msgQueue_.empty())
             {
-              do_write();
+              sendMsg();
             }
           }
           else
@@ -107,9 +113,11 @@ private:
         });
   }
 
+
 private:
-  boost::asio::io_service& io_service_;
-  tcp::socket socket_;
-  chat_message read_msg_;
-  chat_message_queue write_msgs_;
-}
+
+    boost::asio::io_service& io_service_;
+    tcp::socket socket_;
+    Message msg_;
+    messageQueue msgQueue_;
+};

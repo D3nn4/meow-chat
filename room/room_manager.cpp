@@ -4,7 +4,7 @@
 
 RoomManager::RoomManager()
 {
-    std::shared_ptr<Room> ptr= std::make_shared<Room>();
+    Room::Ptr ptr= std::make_shared<Room>();
     ptr->name = "default";
     rooms["default"] = ptr;
 }
@@ -12,7 +12,7 @@ RoomManager::RoomManager()
 void RoomManager::createRoom(std::string name, std::string creator)
 {
     if(rooms.find(name) == rooms.end()){
-        std::shared_ptr<Room> ptr= std::make_shared<Room>();
+        Room::Ptr ptr= std::make_shared<Room>();
         ptr->name = name;
         rooms[name] = ptr;
         // creator.roleByServ[name] = User::Role::ADMIN;
@@ -31,7 +31,7 @@ void RoomManager::deleteRoom(std::string name)
 
 void RoomManager::addUser(std::string name, std::string newUser)
 {
-    std::shared_ptr<Room> room = rooms[name];
+    Room::Ptr room = rooms[name];
     // if(room.banList.find(newUser.pseudo) != room.banList.end()){
     //     std::cout << "You are ban from this room.\n";
     //     return;
@@ -42,10 +42,6 @@ void RoomManager::addUser(std::string name, std::string newUser)
     if(rooms.find(name) != rooms.end()) {
         if(room->userList.find(newUser) == room->userList.end()){
             room->userList.insert(newUser);
-            std::cout << newUser << " joined " << name << " room.\n";
-        }
-        else{
-            std::cout << "User " << newUser << " already in room.\n";
         }
     }
     else{

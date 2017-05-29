@@ -22,7 +22,7 @@ public:
     void removeUser(std::string name, std::string user);
 // private:
 
-    std::map<std::string, std::shared_ptr<Room> > rooms;
+    std::map<std::string, Room::Ptr> rooms;
 
 };
 #endif //_ROOM_MANAGER_HPP_

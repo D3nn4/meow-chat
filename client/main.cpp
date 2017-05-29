@@ -3,6 +3,7 @@
 #include <iostream>
 #include <thread>
 #include <boost/asio.hpp>
+#include "client.cpp"
 
 using boost::asio::ip::tcp;
 
@@ -20,22 +21,34 @@ int main(int argc, char* argv[])
 
             tcp::resolver resolver(io_service);
             auto endpoint_iterator = resolver.resolve({ argv[1], argv[2] });
-            // chat_client c(io_service, endpoint_iterator);
+            Client c(io_service, endpoint_iterator);
+            std::cout << "Enter your pseudo :";
+            std::cin >> c.pseudo;
 
             std::thread t([&io_service](){ io_service.run(); });
 
-            int max_msg_length = 512;
-            char line[max_body_length + 1];
-            while (std::cin.getline(line, max_msg_length + 1))
+
+            
+            char line[Message::maxBodyLength+ 1];
+            // std::cout << c.pseudo << ": ";
+            while (std::cin.getline(line, Message::maxBodyLength + 1))
                 {
-                    // chat_message msg;
-                    // msg.body_length(std::strlen(line));
-                    // std::memcpy(msg.body(), line, msg.body_length());
-                    // msg.encode_header();
-                    // c.write(msg);
+                    Message msg;
+                    //TODO do by real rooms
+                    msg.room = "default";
+                    msg.sender = c.pseudo;
+                    msg.bodyLength = std::strlen(line);
+                    msg.msg = line;
+                    if(!msg.msg.empty()) {
+                        msg.encodeHeader();
+                        c.write(msg);
+                    }
+                    char *end = line + sizeof(line);
+                    std::fill(line, end, 0);;
+                    // std::cout << c.pseudo << ": ";
                 }
 
-            // c.close();
+            c.close();
             t.join();
         }
     catch (std::exception& e)

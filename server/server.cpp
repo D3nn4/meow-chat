@@ -13,17 +13,27 @@ using boost::asio::ip::tcp;
 
 class Server
 {
+    typedef std::deque<Message> messageQueue;
+
 public:
-  Server(boost::asio::io_service& io_service,
-         const tcp::endpoint& endpoint,
-         UserManager& userManager)
-    : acceptor_(io_service, endpoint),
-      socket_(io_service),
-      userManager_(userManager),
-      nameIndex_(0)
-  {
-    accept();
-  }
+    Server(boost::asio::io_service& io_service,
+           const tcp::endpoint& endpoint,
+           UserManager& userManager)
+        : io_service_(io_service),
+          acceptor_(io_service, endpoint),
+          socket_(io_service),
+          userManager_(userManager),
+          nameIndex_(0)
+    {
+        accept();
+    }
+
+    void write(const Message& msg)
+    {
+        io_service_.post([this, msg]() {
+                    sendMsg(msg);
+        });
+    }
 
 private:
 
@@ -36,8 +46,7 @@ private:
                     std::string pseudo = "Anonyme" + index;
                     nameIndex_++;
                     User::Ptr newUser = userManager_.createUser(pseudo, std::move(socket_));
-                    std::cout << "new client\n";
-                    read(newUser);
+                    readHeader(newUser);
                 }
                 else{
                     std::cout << "error accept:" << ec.message() << std::endl;
@@ -48,25 +57,58 @@ private:
         acceptor_.async_accept(socket_,acceptCallback);
 
     }
-    void read(User::Ptr user)
+    void readHeader(User::Ptr user)
     {
         // TODO change user en class with getBuffer etc
         boost::asio::async_read(user->socket,
                                 boost::asio::buffer(user->message.buff, Message::headerLength),
-                                [this, user](boost::system::error_code ec, std::size_t)
-                                {
+                                [this, user](boost::system::error_code ec, std::size_t) {
                                     if(!ec && user->message.decodeHeader()) {
-                                        // boost::asio::buffer(user->message.body())
-                                        std::cout << "toto\n";
+                                        readBody(user);
                                     }
                                     else{
-                                        std::cout << "error read:" << ec.message() << std::endl;
+                                        std::cout << "error readHeader:" << ec.message() << std::endl;
                                     }
                                 });
-        //asynch read with callback
-        //at end callback readCallback()
+    }
+    void readBody(User::Ptr user)
+    {
+        Message& msg = user->message;
+        boost::asio::async_read(user->socket,
+                                boost::asio::buffer(msg.body(), msg.bodyLength),
+                                [this, user](boost::system::error_code ec, std::size_t) {
+                                    if(!ec) {
+                                        user->message.decodeBody();
+                                        if(user->pseudo.compare(user->message.sender) != 0){
+                                            user->pseudo = user->message.sender;
+                                        }
+                                        write(user->message);
+                                        readHeader(user);
+                                    }
+                                    else{
+                                        std::cout << "error readBody:" << ec.message() << std::endl;
+                                    }
+                                });
     }
 
+    void sendMsg(const Message& msg) {
+        Room::Ptr room = userManager_.roomManager.rooms[msg.room];
+        for(const std::string& user: room->userList){
+            boost::asio::async_write(userManager_.users[user]->socket,
+                                     boost::asio::buffer(msg.encodedMsg,
+                                                         msg.encodedMsg.size()),
+                                     [this](boost::system::error_code ec, std::size_t /*length*/) {
+                                         // if (!ec) {
+                                         //     sendMsg();
+                                         // }
+                                         if(ec){
+                                             std::cout << "error broadcast:" << ec.message() << std::endl;
+                                         }
+                                     });
+        }
+    }
+
+    boost::asio::io_service& io_service_;
     tcp::acceptor acceptor_;
     tcp::socket socket_;
     UserManager& userManager_;

@@ -2,11 +2,11 @@ NAME = client
 
 SRC =	main.cpp \
 			client.cpp \
-			../room/room_manager.cpp \
-			../user/user_manager.cpp
+			../include/room/room_manager.cpp \
+			../include/user/user_manager.cpp
 
-HEADER = -I../user \
-				-I../room \
+HEADER = -I../include/user \
+				-I../include/room \
 				-I../include
 OBJDIR =
 

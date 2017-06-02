@@ -26,7 +26,7 @@ struct Message
         header[headerLength] = '\0';
         bodyLength = std::atoi(header);
 
-        if (bodyLength > maxBodyLength) {
+        if (bodyLength == 0 || bodyLength > maxBodyLength) {
             bodyLength = 0;
             return false;
         }

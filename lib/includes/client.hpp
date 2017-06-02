@@ -13,15 +13,32 @@ public:
     
     std::string pseudo;
     Client(boost::asio::io_service& io_service,
-           tcp::resolver::iterator endpoint_iterator)
+           tcp::resolver::iterator& endpoint_iterator)
         : io_service_(io_service),
-          socket_(io_service)
+          endpoint_iterator_(endpoint_iterator),
+          socket_(io_service) {}
+
+    ~Client()
     {
-        connect(endpoint_iterator);
+        io_service_.post([this]() { socket_.close(); });
     }
 
+    void runClient()
+    {
+        if(displayMsg_) {
+                connect();
+        }
+    }
+    
+    void setReadCallback(std::function<void(std::string)> func)
+    {
+        displayMsg_ = func;
+        runClient();
+    }
+    
     void createMsg(std::string entry)
     {
+        std::cout << "Create msg with entry: " << entry << std::endl;
                 if(!entry.empty()) {
                     Message msg;
                     //TODO do by real rooms
@@ -30,30 +47,30 @@ public:
                     msg.bodyLength = entry.size();
                     msg.msg = entry;
                     msg.encodeHeader();
+                    std::cout << "Msg created with pseudo :" << msg.sender << " and msg : " << msg.msg << std::endl;
                     write(msg);
                 }
     }
     void write(const Message& msg)
     {
+        std::cout << "in write, msg: "<< msg.encodedMsg << std::endl;
         io_service_.post(
                          [this, msg]() {
+                             std::cout << "toto\n";
                              bool writeInProgress = !msgQueue_.empty();
                              msgQueue_.push_back(msg);
+                             std::cout << "msg post: " << msg.encodedMsg << std::endl;
                              if (!writeInProgress) {
                                  sendMsg();
                              }
                          });
     }
 
-    void close()
-    {
-        io_service_.post([this]() { socket_.close(); });
-    }
 
 private:
-    void connect(tcp::resolver::iterator endpoint_iterator)
+    void connect()
     {
-        boost::asio::async_connect(socket_, endpoint_iterator,
+        boost::asio::async_connect(socket_, endpoint_iterator_,
                                    [this](boost::system::error_code ec, tcp::resolver::iterator) {
                                        if (!ec) {
                                            readHeader();
@@ -83,8 +100,8 @@ private:
                                     if (!ec) {
                                         msg_.decodeBody();
                                         if(!msg_.msg.empty() /* && msg_.sender.compare(pseudo) != 0 */) {
-                                            
-                                            std::cout << msg_.sender << ": " << msg_.msg << std::endl;
+                                            std::string toDisplay = msg_.sender + ": " + msg_.msg;
+                                            displayMsg_(toDisplay);
                                             msg_.emptyMe();
                                         }
                                         readHeader();
@@ -117,7 +134,10 @@ private:
 private:
 
     boost::asio::io_service& io_service_;
+    tcp::resolver::iterator& endpoint_iterator_;
     tcp::socket socket_;
+    std::thread t_;
     Message msg_;
     messageQueue msgQueue_;
+    std::function<void(std::string)> displayMsg_;
 };

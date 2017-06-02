@@ -46,6 +46,7 @@ private:
                     std::string pseudo = "Anonyme" + index;
                     nameIndex_++;
                     User::Ptr newUser = userManager_.createUser(pseudo, std::move(socket_));
+                    std::cout << "newUser.\n";
                     readHeader(newUser);
                 }
                 else{
@@ -66,9 +67,12 @@ private:
                                     if(!ec && user->message.decodeHeader()) {
                                         readBody(user);
                                     }
-                                    else{
-                                        std::cout << "error readHeader:" << ec.message() << std::endl;
+                                    else if(ec != boost::asio::error::eof){
+                                      std::cout << "error readHeader:" << ec.message() << std::endl;
+                                      readHeader(user);
                                     }
+                                    // else{
+                                    // }
                                 });
     }
     void readBody(User::Ptr user)
@@ -83,29 +87,30 @@ private:
                                             user->pseudo = user->message.sender;
                                         }
                                         write(user->message);
-                                        readHeader(user);
                                     }
                                     else{
                                         std::cout << "error readBody:" << ec.message() << std::endl;
                                     }
+                                    readHeader(user);
                                 });
     }
 
     void sendMsg(const Message& msg) {
         Room::Ptr room = userManager_.roomManager.rooms[msg.room];
         for(const std::string& user: room->userList){
-            boost::asio::async_write(userManager_.users[user]->socket,
-                                     boost::asio::buffer(msg.encodedMsg,
-                                                         msg.encodedMsg.size()),
-                                     [this](boost::system::error_code ec, std::size_t /*length*/) {
-                                         // if (!ec) {
-                                         //     sendMsg();
-                                         // }
-                                         if(ec){
-                                             std::cout << "error broadcast:" << ec.message() << std::endl;
-                                         }
-                                     });
+          std::cout << "message " << msg.msg << " broadcast to " << user << std::endl;
+          boost::asio::async_write(userManager_.users[user]->socket,
+                                   boost::asio::buffer(msg.encodedMsg,
+                                                       msg.encodedMsg.size()),
+                                   [this](boost::system::error_code ec, std::size_t /*length*/) {
+                                     // if (!ec) {
+                                     // }
+                                     if(ec){
+                                       std::cout << "error broadcast:" << ec.message() << std::endl;
+                                     }
+                                   });
         }
+        // msg.emptyMe();
     }
 
     boost::asio::io_service& io_service_;

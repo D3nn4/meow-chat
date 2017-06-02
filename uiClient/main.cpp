@@ -17,10 +17,7 @@ int main(int argc, char *argv[])
 
     UiClient w(c);
 
-    std::thread t([&io_service](){
-        std::cout << "start thread\n";
-        io_service.run();
-    std::cout << "end thread\n";});
+    std::thread t([&io_service](){io_service.run();});
 
     w.show();
 

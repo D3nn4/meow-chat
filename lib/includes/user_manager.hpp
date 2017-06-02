@@ -25,7 +25,7 @@ public:
     // private:
 
     RoomManager& roomManager;
-    std::map<std::string, std::shared_ptr<User> > users;
+    std::map<std::string, User::Ptr> users;
 
 };
 #endif //_USER_MANAGER_HPP_

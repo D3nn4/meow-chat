@@ -1,20 +1,14 @@
-NAME = libchat
+NAME = libchat.a
 
-SRC = ./room/room_manager.cpp \
-			./user/user_manager.cpp \
-			./client/client.cpp
-
-HEADER = -I ./room \
-				-I ./user
+SRC = ./srcs/*.cpp
 
 OBJDIR =
 
 all : $(NAME)
 
 $(NAME) :
-	g++ -std=c++11 -ggdb3 -Wall -Wextra $(HEADER) -c $(SRC)
-	g++ -o $(NAME)   *.o -L/home/me/googletest/lib -lgtest -lgmock -lpthread
-
+	g++ -std=c++11 -c $(SRC) -Iincludes -lpthread
+	ar rvs $(NAME) *.o
 
 clean :
 	rm -f *.o

@@ -18,7 +18,6 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
-#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTextBrowser>
 #include <QtWidgets/QToolBar>
@@ -31,11 +30,7 @@ class Ui_UiClient
 {
 public:
     QWidget *centralWidget;
-    QWidget *widget;
-    QHBoxLayout *horizontalLayout;
-    QLineEdit *lineEdit_username;
-    QPushButton *pushButton_username;
-    QWidget *widget1;
+    QWidget *layoutWidget;
     QVBoxLayout *verticalLayout;
     QTextBrowser *DisplayChat;
     QHBoxLayout *horizontalLayout_2;
@@ -51,33 +46,15 @@ public:
         UiClient->resize(600, 400);
         centralWidget = new QWidget(UiClient);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
-        widget = new QWidget(centralWidget);
-        widget->setObjectName(QStringLiteral("widget"));
-        widget->setGeometry(QRect(20, 10, 213, 25));
-        horizontalLayout = new QHBoxLayout(widget);
-        horizontalLayout->setSpacing(6);
-        horizontalLayout->setContentsMargins(11, 11, 11, 11);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        horizontalLayout->setContentsMargins(0, 0, 0, 0);
-        lineEdit_username = new QLineEdit(widget);
-        lineEdit_username->setObjectName(QStringLiteral("lineEdit_username"));
-
-        horizontalLayout->addWidget(lineEdit_username);
-
-        pushButton_username = new QPushButton(widget);
-        pushButton_username->setObjectName(QStringLiteral("pushButton_username"));
-
-        horizontalLayout->addWidget(pushButton_username);
-
-        widget1 = new QWidget(centralWidget);
-        widget1->setObjectName(QStringLiteral("widget1"));
-        widget1->setGeometry(QRect(20, 60, 258, 225));
-        verticalLayout = new QVBoxLayout(widget1);
+        layoutWidget = new QWidget(centralWidget);
+        layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
+        layoutWidget->setGeometry(QRect(20, 60, 258, 225));
+        verticalLayout = new QVBoxLayout(layoutWidget);
         verticalLayout->setSpacing(6);
         verticalLayout->setContentsMargins(11, 11, 11, 11);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         verticalLayout->setContentsMargins(0, 0, 0, 0);
-        DisplayChat = new QTextBrowser(widget1);
+        DisplayChat = new QTextBrowser(layoutWidget);
         DisplayChat->setObjectName(QStringLiteral("DisplayChat"));
 
         verticalLayout->addWidget(DisplayChat);
@@ -85,7 +62,7 @@ public:
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setSpacing(6);
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-        lineEdit_message = new QLineEdit(widget1);
+        lineEdit_message = new QLineEdit(layoutWidget);
         lineEdit_message->setObjectName(QStringLiteral("lineEdit_message"));
 
         horizontalLayout_2->addWidget(lineEdit_message);
@@ -113,7 +90,6 @@ public:
     void retranslateUi(QMainWindow *UiClient)
     {
         UiClient->setWindowTitle(QApplication::translate("UiClient", "UiClient", 0));
-        pushButton_username->setText(QApplication::translate("UiClient", "Submit", 0));
     } // retranslateUi
 
 };

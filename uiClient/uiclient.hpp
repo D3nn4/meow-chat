@@ -18,7 +18,6 @@ public:
     void display_new_msg(std::string entry);
 
 private slots:
-    void on_pushButton_username_clicked();
 
     void on_lineEdit_message_returnPressed();
 

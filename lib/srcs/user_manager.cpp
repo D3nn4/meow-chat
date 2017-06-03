@@ -16,11 +16,13 @@ User::Ptr UserManager::createUser(std::string pseudo,tcp::socket&& socket)
 
 void UserManager::deleteUser(std::string pseudo)
 {
-    // User::Ptr user = users[pseudo];
+    std::cout << "In deleteUser\n";
+    User::Ptr user = users[pseudo];
+    // std::cout << "in delete user for " << user->pseudo << std::endl;
     // for(std::string room: user->joinedRooms){
-    //     roomManager.deleteUser(room, pseudo);
+    //     roomManager.removeUser(room, pseudo);
     // }
-    users.erase(pseudo);
+    // users.erase(pseudo);
 }
 
 void UserManager::joinRoom(std::string roomName, std::string user)

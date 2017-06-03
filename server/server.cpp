@@ -67,12 +67,15 @@ private:
                                     if(!ec && user->message.decodeHeader()) {
                                         readBody(user);
                                     }
-                                    else if(ec != boost::asio::error::eof){
+                                    else if(ec == boost::asio::error::eof){
+                                      ////////////////
+                                      userManager_.deleteUser(user->pseudo);
+                                      
+                                    }
+                                    else{
                                       std::cout << "error readHeader:" << ec.message() << std::endl;
                                       readHeader(user);
                                     }
-                                    // else{
-                                    // }
                                 });
     }
     void readBody(User::Ptr user)

@@ -40,15 +40,17 @@ public:
     {
         std::cout << "Create msg with entry: " << entry << std::endl;
                 if(!entry.empty()) {
-                    Message msg;
-                    //TODO do by real rooms
-                    msg.room = "default";
-                    msg.sender = pseudo;
-                    msg.bodyLength = entry.size();
-                    msg.msg = entry;
-                    msg.encodeHeader();
-                    std::cout << "Msg created with pseudo :" << msg.sender << " and msg : " << msg.msg << std::endl;
-                    write(msg);
+                    if(entry[0] != '/'){
+                        Message msg;
+                        //TODO do by real rooms
+                        msg.room = "default";
+                        msg.sender = pseudo;
+                        msg.bodyLength = entry.size();
+                        msg.msg = entry;
+                        msg.encodeHeader(Message::Type::TEXTMSG);
+                        std::cout << "Msg created with pseudo :" << msg.sender << " and msg : " << msg.msg << std::endl;
+                        write(msg);
+                    }
                 }
     }
     void write(const Message& msg)

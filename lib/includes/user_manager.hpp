@@ -21,6 +21,7 @@ public:
     void deleteUser(std::string pseudo);
     void joinRoom(std::string roomName, std::string user);
     void quitRoom(std::string roomName, std::string user);
+    void updateUsername(std::string currentName, std::string newName);
 
     // private:
 

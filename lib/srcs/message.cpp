@@ -69,6 +69,7 @@ void Message::encodeHeader(Type type){
         size.insert(0, "0");
     }
     encodedMsg = size + str;
+    std::cout << "encode header: " << encodedMsg << std::endl;
 }
 
 void Message::emptyMe(){
@@ -79,4 +80,5 @@ void Message::emptyMe(){
     sender.clear();
     msg.clear();
     encodedMsg.clear();
+    std::cout << "empty me, buff = " << buff << "empty ?\n";
 }

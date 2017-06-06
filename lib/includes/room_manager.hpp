@@ -20,6 +20,7 @@ public:
     void deleteRoom(std::string name);
     void addUser(std::string name, std::string newUser);
     void removeUser(std::string name, std::string user);
+    void updateUsername(std::string currentName, std::string newName);
 // private:
 
     std::map<std::string, Room::Ptr> rooms;

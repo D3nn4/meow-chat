@@ -38,7 +38,7 @@ public:
     
     void createMsg(std::string entry)
     {
-        std::cout << "Create msg with entry: " << entry << std::endl;
+        // std::cout << "\nCreate msg with entry: " << entry << std::endl;
                 if(!entry.empty()) {
                     if(entry[0] != '/'){
                         Message msg;
@@ -48,20 +48,19 @@ public:
                         msg.bodyLength = entry.size();
                         msg.msg = entry;
                         msg.encodeHeader(Message::Type::TEXTMSG);
-                        std::cout << "Msg created with pseudo :" << msg.sender << " and msg : " << msg.msg << std::endl;
+                        // std::cout << "Msg created with pseudo :" << msg.sender << " and msg : " << msg.msg << std::endl;
                         write(msg);
                     }
                 }
     }
     void write(const Message& msg)
     {
-        std::cout << "in write, msg: "<< msg.encodedMsg << std::endl;
+        // std::cout << "in write, msg: "<< msg.encodedMsg << std::endl;
         io_service_.post(
                          [this, msg]() {
-                             std::cout << "toto\n";
                              bool writeInProgress = !msgQueue_.empty();
                              msgQueue_.push_back(msg);
-                             std::cout << "msg post: " << msg.encodedMsg << std::endl;
+                             // std::cout << "msg post: " << msg.encodedMsg << std::endl;
                              if (!writeInProgress) {
                                  sendMsg();
                              }
@@ -77,41 +76,57 @@ private:
                                        if (!ec) {
                                            readHeader();
                                        }
+                                       else{
+                                           std::cout << "error connect:" << ec.message() << std::endl;
+                                       }
                                    });
     }
 
     void readHeader()
     {
+        // std::cout << "begin read header\n";
+        newMsg_.emptyMe();
         boost::asio::async_read(socket_,
-                                boost::asio::buffer(msg_.buff, Message::headerLength),
+                                boost::asio::buffer(newMsg_.buff, Message::headerLength),
                                 [this](boost::system::error_code ec, std::size_t /*length*/) {
-                                    if (!ec && msg_.decodeHeader()) {
-                                        readBody();
+                                    if (!ec) {
+                                        if(newMsg_.decodeHeader()) {
+                                            readBody();
+                                        }
+                                        else {
+                                            std::cout << "PB DECODE HEADER\n";
+                                            std::cout << "buffer : " << newMsg_.buff << std::endl;
+                                        }
                                     }
                                     else {
+                                        std::cout << "error readHeader:" << ec.message() << std::endl;
                                         socket_.close();
                                     }
+                                    // std::cout << "end read header\n";
                                 });
     }
 
     void readBody()
     {
+        // std::cout << "begin read body\n";
         boost::asio::async_read(socket_,
-                                boost::asio::buffer(msg_.body(), msg_.bodyLength),
+                                boost::asio::buffer(newMsg_.body(), newMsg_.bodyLength),
                                 [this](boost::system::error_code ec, std::size_t /*length*/) {
                                     if (!ec) {
-                                        msg_.decodeBody();
-                                        if(!msg_.msg.empty() /* && msg_.sender.compare(pseudo) != 0 */) {
-                                            std::string toDisplay = msg_.sender + ": " + msg_.msg;
+                                        newMsg_.decodeBody();
+                                        if(!newMsg_.msg.empty()) {
+                                            std::string toDisplay = newMsg_.sender + ": " + newMsg_.msg;
                                             displayMsg_(toDisplay);
-                                            msg_.emptyMe();
                                         }
+                                        newMsg_.emptyMe();
                                         readHeader();
                                     }
                                     else {
+                                        std::cout << "error readBody:" << ec.message() << std::endl;
                                         socket_.close();
                                     }
                                 });
+        // std::cout << "end read body\n";
     }
 
     void sendMsg()
@@ -127,6 +142,7 @@ private:
                                          }
                                      }
                                      else {
+                                         std::cout << "error sendMsg:" << ec.message() << std::endl;
                                          socket_.close();
                                      }
                                  });
@@ -140,6 +156,7 @@ private:
     tcp::socket socket_;
     std::thread t_;
     Message msg_;
+    Message newMsg_;
     messageQueue msgQueue_;
     std::function<void(std::string)> displayMsg_;
 };

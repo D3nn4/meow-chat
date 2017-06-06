@@ -19,6 +19,8 @@ public:
 
 private slots:
 
+
+
     void on_lineEdit_message_returnPressed();
 
 private:

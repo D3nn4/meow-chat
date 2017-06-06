@@ -54,3 +54,15 @@ void RoomManager::removeUser(std::string name, std::string user)
     // user.joinedRooms.erase(name); //to do in user
     rooms[name]->userList.erase(rooms[name]->userList.find(user));
 }
+
+void RoomManager::updateUsername(std::string currentName, std::string newName)
+{
+    for(auto roomPair: rooms){
+        std::set<std::string>&  userList = roomPair.second->userList;
+        auto userIt = userList.find(currentName);
+        if(userIt != userList.end()){
+            userList.insert(newName);
+            userList.erase(currentName);
+        }
+    }
+}

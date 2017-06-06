@@ -17,12 +17,16 @@ User::Ptr UserManager::createUser(std::string pseudo,tcp::socket&& socket)
 void UserManager::deleteUser(std::string pseudo)
 {
     std::cout << "In deleteUser\n";
-    User::Ptr user = users[pseudo];
-    // std::cout << "in delete user for " << user->pseudo << std::endl;
-    // for(std::string room: user->joinedRooms){
-    //     roomManager.removeUser(room, pseudo);
-    // }
-    // users.erase(pseudo);
+    auto userIt = users.find(pseudo);
+    if(userIt == users.end()){
+        std::cout << "No user found\n";
+    }
+    else {
+        for(std::string room: userIt->second->joinedRooms){
+            roomManager.removeUser(room, pseudo);
+        }
+        users.erase(pseudo);
+    }
 }
 
 void UserManager::joinRoom(std::string roomName, std::string user)
@@ -41,4 +45,12 @@ void UserManager::quitRoom(std::string roomName, std::string user)
 {
     users[user]->joinedRooms.erase(roomName);
     roomManager.removeUser(roomName, user);
+}
+
+void UserManager::updateUsername(std::string currentName, std::string newName)
+{
+    roomManager.updateUsername(currentName, newName);
+    users[newName] = users[currentName];
+    users[newName]->pseudo = newName;
+    users.erase(currentName);
 }

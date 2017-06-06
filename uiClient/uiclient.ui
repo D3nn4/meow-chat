@@ -20,7 +20,7 @@
       <x>20</x>
       <y>60</y>
       <width>258</width>
-      <height>225</height>
+      <height>251</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -35,6 +35,16 @@
       </layout>
      </item>
     </layout>
+   </widget>
+   <widget class="QListView" name="listView_userlist">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>60</y>
+      <width>101</width>
+      <height>251</height>
+     </rect>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">

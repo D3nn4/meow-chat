@@ -16,6 +16,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QStatusBar>
@@ -35,6 +36,7 @@ public:
     QTextBrowser *DisplayChat;
     QHBoxLayout *horizontalLayout_2;
     QLineEdit *lineEdit_message;
+    QListView *listView_userlist;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -48,7 +50,7 @@ public:
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         layoutWidget = new QWidget(centralWidget);
         layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
-        layoutWidget->setGeometry(QRect(20, 60, 258, 225));
+        layoutWidget->setGeometry(QRect(20, 60, 258, 251));
         verticalLayout = new QVBoxLayout(layoutWidget);
         verticalLayout->setSpacing(6);
         verticalLayout->setContentsMargins(11, 11, 11, 11);
@@ -70,6 +72,9 @@ public:
 
         verticalLayout->addLayout(horizontalLayout_2);
 
+        listView_userlist = new QListView(centralWidget);
+        listView_userlist->setObjectName(QStringLiteral("listView_userlist"));
+        listView_userlist->setGeometry(QRect(290, 60, 101, 251));
         UiClient->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(UiClient);
         menuBar->setObjectName(QStringLiteral("menuBar"));

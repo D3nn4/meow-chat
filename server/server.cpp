@@ -60,48 +60,49 @@ private:
     }
     void readHeader(User::Ptr user)
     {
-        // TODO change user en class with getBuffer etc
-        boost::asio::async_read(user->socket,
-                                boost::asio::buffer(user->message.buff, Message::headerLength),
-                                [this, user](boost::system::error_code ec, std::size_t) {
-                                    if(!ec && user->message.decodeHeader()) {
-                                        readBody(user);
-                                    }
-                                    else if(ec == boost::asio::error::eof){
-                                      ////////////////
-                                      userManager_.deleteUser(user->pseudo);
-                                      
-                                    }
-                                    else{
-                                      std::cout << "error readHeader:" << ec.message() << std::endl;
+      // TODO change user en class with getBuffer etc
+      user->message.emptyMe();
+      boost::asio::async_read(user->socket,
+                              boost::asio::buffer(user->message.buff, Message::headerLength),
+                              [this, user](boost::system::error_code ec, std::size_t) {
+                                if(!ec && user->message.decodeHeader()) {
+                                  readBody(user);
+                                }
+                                else if(ec == boost::asio::error::eof){
+                                  ////////////////
+                                  userManager_.deleteUser(user->pseudo);
+                                }
+                                else{
+                                  std::cout << "error readHeader:" << ec.message() << std::endl;
                                       readHeader(user);
-                                    }
-                                });
+                                }
+                              });
     }
     void readBody(User::Ptr user)
     {
         Message& msg = user->message;
-        boost::asio::async_read(user->socket,
-                                boost::asio::buffer(msg.body(), msg.bodyLength),
-                                [this, user](boost::system::error_code ec, std::size_t) {
-                                    if(!ec) {
-                                        user->message.decodeBody();
-                                        if(user->pseudo.compare(user->message.sender) != 0){
-                                            user->pseudo = user->message.sender;
-                                        }
-                                        write(user->message);
-                                    }
-                                    else{
-                                        std::cout << "error readBody:" << ec.message() << std::endl;
-                                    }
+        boost::asio::async_read(
+        user->socket,
+        boost::asio::buffer(msg.body(), msg.bodyLength),
+          [this, user](boost::system::error_code ec, std::size_t) {
+          if(!ec) {
+            user->message.decodeBody();
+            if(user->pseudo.compare(user->message.sender) != 0){
+              userManager_.updateUsername(user->pseudo, user->message.sender);
+            }
+            write(user->message);
+          }
+          else{
+            std::cout << "error readBody:" << ec.message() << std::endl;
+          }
                                     readHeader(user);
-                                });
+        });
     }
 
     void sendMsg(const Message& msg) {
         Room::Ptr room = userManager_.roomManager.rooms[msg.room];
         for(const std::string& user: room->userList){
-          std::cout << "message " << msg.msg << " broadcast to " << user << std::endl;
+          std::cout << "message " << msg.encodedMsg << " broadcast to " << user << std::endl;
           boost::asio::async_write(userManager_.users[user]->socket,
                                    boost::asio::buffer(msg.encodedMsg,
                                                        msg.encodedMsg.size()),
@@ -113,7 +114,6 @@ private:
                                      }
                                    });
         }
-        // msg.emptyMe();
     }
 
     boost::asio::io_service& io_service_;

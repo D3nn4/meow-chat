@@ -46,9 +46,9 @@ private:
                     std::string pseudo = "Anonyme" + index;
                     nameIndex_++;
                     User::Ptr newUser = userManager_.createUser(pseudo, std::move(socket_));
-                    for(auto room: newUser->joinedRooms){
-                      write(userManager_.createUserListMsg(room));
-                    }
+                    // for(auto room: newUser->joinedRooms){
+                    //   write(userManager_.createUserListMsg(room));
+                    // }
                     std::cout << "newUser.\n";
                     readHeader(newUser);
                 }
@@ -68,8 +68,10 @@ private:
       boost::asio::async_read(user->socket,
                               boost::asio::buffer(user->message.buff, Message::headerLength),
                               [this, user](boost::system::error_code ec, std::size_t) {
-                                if(!ec && user->message.decodeHeader()) {
-                                  readBody(user);
+                                if(!ec) {
+                                  if(user->message.decodeHeader()) {
+                                      readBody(user);
+                                    }
                                 }
                                 else if(ec == boost::asio::error::eof){
                                   ////////////////

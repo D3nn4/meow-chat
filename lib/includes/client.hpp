@@ -28,6 +28,7 @@ public:
         if(displayMsg_ && displayUsers_) {
                 connect();
         }
+        createMsg("");
     }
     
     void setReadCallback(std::function<void(std::string)> funcMsg,
@@ -41,7 +42,7 @@ public:
     void createMsg(std::string entry)
     {
         // std::cout << "\nCreate msg with entry: " << entry << std::endl;
-                if(!entry.empty()) {
+                // if(!entry.empty()) {
                     if(entry[0] != '/'){
                         Message msg;
                         //TODO do by real rooms
@@ -52,7 +53,7 @@ public:
                         msg.encodeHeader(Message::Type::TEXTMSG);
                         // std::cout << "Msg created with pseudo :" << msg.sender << " and msg : " << msg.msg << std::endl;
                         write(msg);
-                    }
+                    // }
                 }
     }
     void write(const Message& msg)

@@ -36,12 +36,12 @@
      </item>
     </layout>
    </widget>
-   <widget class="QListView" name="listView_userlist">
+   <widget class="QTextBrowser" name="textBrowser_userList">
     <property name="geometry">
      <rect>
       <x>290</x>
       <y>60</y>
-      <width>101</width>
+      <width>121</width>
       <height>251</height>
      </rect>
     </property>

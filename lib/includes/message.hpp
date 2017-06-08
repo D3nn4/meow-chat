@@ -25,9 +25,10 @@ public:
     Message();
     bool decodeHeader();
     char* body();
-    void decodeBody();
+    Type decodeBody();
     void encodeHeader(Message::Type type);
     void emptyMe();
+    std::vector<std::string> getUserList();
 
     char buff[headerLength + maxBodyLength];
     int bodyLength;
@@ -38,13 +39,15 @@ public:
 
 private:
 
-    enum class TextToken
+    enum class Token
         {
             ROOM = 2,
             SENDER,
             MSG
         };
     void decodeTextMsg(std::vector<std::string> strs);
+    void decodeUserList(std::vector<std::string> strs);
+    std::vector<std::string> users;
 };
 
 #endif //_MESSAGE_HPP_

@@ -22,7 +22,7 @@ public:
     void joinRoom(std::string roomName, std::string user);
     void quitRoom(std::string roomName, std::string user);
     void updateUsername(std::string currentName, std::string newName);
-
+    Message createUserListMsg(std::string room);
     // private:
 
     RoomManager& roomManager;

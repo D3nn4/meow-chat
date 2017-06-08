@@ -25,14 +25,16 @@ public:
 
     void runClient()
     {
-        if(displayMsg_) {
+        if(displayMsg_ && displayUsers_) {
                 connect();
         }
     }
     
-    void setReadCallback(std::function<void(std::string)> func)
+    void setReadCallback(std::function<void(std::string)> funcMsg,
+                         std::function<void(std::vector<std::string>)>funcUsers)
     {
-        displayMsg_ = func;
+        displayMsg_ = funcMsg;
+        displayUsers_ = funcUsers;
         runClient();
     }
     
@@ -113,10 +115,14 @@ private:
                                 boost::asio::buffer(newMsg_.body(), newMsg_.bodyLength),
                                 [this](boost::system::error_code ec, std::size_t /*length*/) {
                                     if (!ec) {
-                                        newMsg_.decodeBody();
-                                        if(!newMsg_.msg.empty()) {
+                                        Message::Type type = newMsg_.decodeBody();
+                                        if(type == Message::Type::TEXTMSG
+                                           &&!newMsg_.msg.empty()) {
                                             std::string toDisplay = newMsg_.sender + ": " + newMsg_.msg;
                                             displayMsg_(toDisplay);
+                                        }
+                                        else if (type == Message::Type::USERLIST){
+                                            displayUsers_(newMsg_.getUserList());
                                         }
                                         newMsg_.emptyMe();
                                         readHeader();
@@ -159,4 +165,5 @@ private:
     Message newMsg_;
     messageQueue msgQueue_;
     std::function<void(std::string)> displayMsg_;
+    std::function<void(std::vector<std::string>)> displayUsers_;
 };

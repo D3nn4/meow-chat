@@ -16,16 +16,24 @@ public:
     explicit UiClient(Client& client, QWidget *parent = 0);
     ~UiClient();
     void display_new_msg(std::string entry);
+    void sendSignal(std::vector<std::string> users);
+
+public slots:
+
+     void display_users(std::vector<std::string> users);
+
+signals:
+
+    void clearSignal(std::vector<std::string> users);
 
 private slots:
-
-
 
     void on_lineEdit_message_returnPressed();
 
 private:
     Ui::UiClient *ui;
     Client& c;
+    //std::vector<std::string> usersListTemp;
 };
 
 #endif // UICLIENT_HPP

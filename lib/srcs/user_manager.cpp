@@ -54,3 +54,22 @@ void UserManager::updateUsername(std::string currentName, std::string newName)
     users[newName]->pseudo = newName;
     users.erase(currentName);
 }
+
+Message UserManager::createUserListMsg(std::string room)
+{
+    Message userListMsg;
+    if(!room.empty()) {
+        /////////////
+        std::set<std::string> userList = roomManager.rooms[room]->userList;
+        for(auto user: userList){
+            if(!userListMsg.msg.empty()){
+                userListMsg.msg += "/";
+            }
+            userListMsg.msg += user;
+        }
+        userListMsg.room = room;
+        userListMsg.sender = "server";
+        userListMsg.encodeHeader(Message::Type::USERLIST);
+    }
+    return userListMsg;
+}

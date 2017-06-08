@@ -4,6 +4,8 @@
 
 using boost::asio::ip::tcp;
 
+
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -19,6 +21,7 @@ int main(int argc, char *argv[])
 
 
     UiClient w(c);
+
 
     t = std::thread{([&io_service](){io_service.run();})};
 

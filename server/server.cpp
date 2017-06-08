@@ -46,6 +46,9 @@ private:
                     std::string pseudo = "Anonyme" + index;
                     nameIndex_++;
                     User::Ptr newUser = userManager_.createUser(pseudo, std::move(socket_));
+                    for(auto room: newUser->joinedRooms){
+                      write(userManager_.createUserListMsg(room));
+                    }
                     std::cout << "newUser.\n";
                     readHeader(newUser);
                 }
@@ -70,7 +73,11 @@ private:
                                 }
                                 else if(ec == boost::asio::error::eof){
                                   ////////////////
+                                  std::set<std::string> rooms = user->joinedRooms;
                                   userManager_.deleteUser(user->pseudo);
+                                  for(auto room: rooms){
+                                    write(userManager_.createUserListMsg(room));
+                                  }
                                 }
                                 else{
                                   std::cout << "error readHeader:" << ec.message() << std::endl;
@@ -89,6 +96,9 @@ private:
             user->message.decodeBody();
             if(user->pseudo.compare(user->message.sender) != 0){
               userManager_.updateUsername(user->pseudo, user->message.sender);
+              for(auto room: user->joinedRooms){
+                write(userManager_.createUserListMsg(room));
+              }
             }
             write(user->message);
           }
@@ -100,19 +110,24 @@ private:
     }
 
     void sendMsg(const Message& msg) {
+      // std::cout << "in send Message\n";
+      // std::cout << "msg room : " << msg.room << std::endl;
         Room::Ptr room = userManager_.roomManager.rooms[msg.room];
-        for(const std::string& user: room->userList){
-          std::cout << "message " << msg.encodedMsg << " broadcast to " << user << std::endl;
-          boost::asio::async_write(userManager_.users[user]->socket,
-                                   boost::asio::buffer(msg.encodedMsg,
-                                                       msg.encodedMsg.size()),
-                                   [this](boost::system::error_code ec, std::size_t /*length*/) {
-                                     // if (!ec) {
-                                     // }
-                                     if(ec){
-                                       std::cout << "error broadcast:" << ec.message() << std::endl;
-                                     }
-                                   });
+        // std::cout << "after geting room ptr\n";
+        if(!room->userList.empty()) {
+            for(const std::string& user: room->userList){
+              std::cout << "message " << msg.encodedMsg << " broadcast to " << user << std::endl;
+              boost::asio::async_write(userManager_.users[user]->socket,
+                                       boost::asio::buffer(msg.encodedMsg,
+                                                           msg.encodedMsg.size()),
+                                       [this](boost::system::error_code ec, std::size_t /*length*/) {
+                                         // if (!ec) {
+                                         // }
+                                         if(ec){
+                                           std::cout << "error broadcast:" << ec.message() << std::endl;
+                                         }
+                                       });
+            }
         }
     }
 

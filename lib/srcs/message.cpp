@@ -1,11 +1,7 @@
 #include "message.hpp"
 
 Message::Message()
-    :bodyLength(0),
-     room("\0"),
-     sender("\0"),
-     msg("\0"),
-     encodedMsg("\0")
+    :bodyLength(0)
 {
     std::fill(buff, (buff + sizeof(buff)), 0);
 }
@@ -31,10 +27,10 @@ char* Message::body()
 
 void Message::decodeTextMsg(std::vector<std::string> strs)
 {
-    room = strs[static_cast<int>(TextToken::ROOM)];
-    sender = strs[static_cast<int>(TextToken::SENDER)];
-    msg = strs[static_cast<int>(TextToken::MSG)];
-    int moreMSg = static_cast<int>(TextToken::MSG) + 1;
+    room = strs[static_cast<int>(Token::ROOM)];
+    sender = strs[static_cast<int>(Token::SENDER)];
+    msg = strs[static_cast<int>(Token::MSG)];
+    int moreMSg = static_cast<int>(Token::MSG) + 1;
     if(strs.size() > moreMSg) {
             for(size_t i = moreMSg; i < strs.size(); i++){
                 msg += "/";
@@ -43,22 +39,41 @@ void Message::decodeTextMsg(std::vector<std::string> strs)
         }
 }
 
-void Message::decodeBody(){
+std::vector<std::string> Message::getUserList()
+{
+    return users;
+}
+
+void Message::decodeUserList(std::vector<std::string> strs)
+{
+    if(strs.size() > static_cast<int>(Token::MSG)) {
+        auto firstUserIt = strs.begin() + static_cast<int>(Token::MSG); 
+        auto lastUserIt = strs.end();
+        std::vector<std::string> list(firstUserIt, lastUserIt);
+        users = list;
+    }
+}
+
+Message::Type Message::decodeBody(){
     encodedMsg = buff;
     std::vector<std::string> strs;
     boost::split(strs,encodedMsg,boost::is_any_of("/"));
     //encodedmsg = taille_str/typeMsg/.....
+    Type type;
     if(!encodedMsg.empty()
        && !strs.empty()
-       && strs.size() > 3) {
+       && strs.size() >= 2) {
         if(strs[1][0] == static_cast<char>(Type::TEXTMSG)
-           && strs.size() > static_cast<int>(TextToken::MSG)){
+           && strs.size() > static_cast<int>(Token::MSG)){
             decodeTextMsg(strs);
+            type = Type::TEXTMSG;
         }
-        else{
-            std::cout << "not textMsg.\n";
+        else if(strs[1][0] == static_cast<char>(Type::USERLIST)){
+                decodeUserList(strs);
+                type = Type::USERLIST;
         }
     }
+        return type;
 }
 
 void Message::encodeHeader(Type type){
@@ -80,5 +95,6 @@ void Message::emptyMe(){
     sender.clear();
     msg.clear();
     encodedMsg.clear();
-    std::cout << "empty me, buff = " << buff << "empty ?\n";
+    users.erase(users.begin(), users.end());
+    // std::cout << "empty me, buff = " << buff << "empty ?\n";
 }

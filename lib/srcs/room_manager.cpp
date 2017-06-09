@@ -2,6 +2,7 @@
 #include "room_manager.hpp"
 #include <memory>
 
+//creation of the default room of the server and the room manager
 RoomManager::RoomManager()
 {
     Room::Ptr ptr= std::make_shared<Room>();
@@ -15,7 +16,6 @@ void RoomManager::createRoom(std::string name, std::string creator)
         Room::Ptr ptr= std::make_shared<Room>();
         ptr->name = name;
         rooms[name] = ptr;
-        // creator.roleByServ[name] = User::Role::ADMIN;
         addUser(name, creator);
     }
 }

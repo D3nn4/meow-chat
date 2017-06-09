@@ -8,13 +8,13 @@
 #include "room.hpp"
 #include "room_manager.hpp"
 
-
+//class managing all users and managing the roomManager
 class UserManager
 {
 public:
 
     typedef std::unique_ptr<UserManager> Ptr;
-    
+
     UserManager(RoomManager& manager)
         :roomManager(manager){}
     User::Ptr createUser(std::string pseudo,tcp::socket&& socket);

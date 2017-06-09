@@ -6,6 +6,7 @@ Message::Message()
     std::fill(buff, (buff + sizeof(buff)), 0);
 }
 
+//header with lenght of remaining str to read to decode
 bool Message::decodeHeader()
 {
     char header[headerLength + 1] = "";
@@ -20,11 +21,13 @@ bool Message::decodeHeader()
     return true;
 }
 
+//ptr to where the buff need to get the rest of the str
 char* Message::body()
 {
     return buff + headerLength;
 }
 
+//if Message::Type::TextMsg, decode the msg sent
 void Message::decodeTextMsg(std::vector<std::string> strs)
 {
     room = strs[static_cast<int>(Token::ROOM)];
@@ -44,6 +47,7 @@ std::vector<std::string> Message::getUserList()
     return users;
 }
 
+//if Message::Type::UserList, get the vector of users by the vector of Msg received
 void Message::decodeUserList(std::vector<std::string> strs)
 {
     if(strs.size() > static_cast<int>(Token::MSG)) {
@@ -54,6 +58,7 @@ void Message::decodeUserList(std::vector<std::string> strs)
     }
 }
 
+//decode what type of Message it is and calling for the linked action
 Message::Type Message::decodeBody(){
     encodedMsg = buff;
     std::vector<std::string> strs;
@@ -76,6 +81,7 @@ Message::Type Message::decodeBody(){
         return type;
 }
 
+//Encoding header with length and Type of msg
 void Message::encodeHeader(Type type){
     std::string sep = "/";
     std::string str = sep + static_cast<char>(type) + sep+ room + sep + sender + sep + msg;
@@ -87,6 +93,7 @@ void Message::encodeHeader(Type type){
     std::cout << "encode header: " << encodedMsg << std::endl;
 }
 
+//emptying every variable of the Message
 void Message::emptyMe(){
     char *end = buff + sizeof(buff);
     std::fill(buff, end, 0);;
@@ -96,5 +103,4 @@ void Message::emptyMe(){
     msg.clear();
     encodedMsg.clear();
     users.erase(users.begin(), users.end());
-    // std::cout << "empty me, buff = " << buff << "empty ?\n";
 }

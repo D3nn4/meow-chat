@@ -3,20 +3,17 @@
 #include <iostream>
 #include "user_manager.hpp"
 
-
+//creation of the user, getting the socket moved from the server asynch accept
 User::Ptr UserManager::createUser(std::string pseudo,tcp::socket&& socket)
 {
-    // if(users.find(name) == users.end()){
     User::Ptr ptr = std::make_shared<User>(pseudo, std::move(socket));
     users[pseudo] = ptr;
     joinRoom("default", pseudo);
     return ptr;
-    // }
 }
 
 void UserManager::deleteUser(std::string pseudo)
 {
-    std::cout << "In deleteUser\n";
     auto userIt = users.find(pseudo);
     if(userIt == users.end()){
         std::cout << "No user found\n";
@@ -55,11 +52,11 @@ void UserManager::updateUsername(std::string currentName, std::string newName)
     users.erase(currentName);
 }
 
+//creating a Message object with the userlist of the given room to be sent back to the user asking it
 Message UserManager::createUserListMsg(std::string room)
 {
     Message userListMsg;
     if(!room.empty()) {
-        /////////////
         std::set<std::string> userList = roomManager.rooms[room]->userList;
         for(auto user: userList){
             if(!userListMsg.msg.empty()){

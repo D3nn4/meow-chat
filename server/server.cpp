@@ -28,6 +28,7 @@ public:
         accept();
     }
 
+  //post need to send
     void write(const Message& msg)
     {
         io_service_.post([this, msg]() {
@@ -37,6 +38,7 @@ public:
 
 private:
 
+  //accept new client, create new user with socket given
     void accept()
     {
         auto acceptCallback =
@@ -46,9 +48,6 @@ private:
                     std::string pseudo = "Anonyme" + index;
                     nameIndex_++;
                     User::Ptr newUser = userManager_.createUser(pseudo, std::move(socket_));
-                    // for(auto room: newUser->joinedRooms){
-                    //   write(userManager_.createUserListMsg(room));
-                    // }
                     std::cout << "newUser.\n";
                     readHeader(newUser);
                 }
@@ -61,6 +60,8 @@ private:
         acceptor_.async_accept(socket_,acceptCallback);
 
     }
+
+  // wait for event to read on socket
     void readHeader(User::Ptr user)
     {
       // TODO change user en class with getBuffer etc
@@ -68,13 +69,14 @@ private:
       boost::asio::async_read(user->socket,
                               boost::asio::buffer(user->message.buff, Message::headerLength),
                               [this, user](boost::system::error_code ec, std::size_t) {
+                                //if no error on reading socket and header valid, go read body
                                 if(!ec) {
                                   if(user->message.decodeHeader()) {
                                       readBody(user);
                                     }
                                 }
+                                //if eof (client gone), delete user and stop loop async
                                 else if(ec == boost::asio::error::eof){
-                                  ////////////////
                                   std::set<std::string> rooms = user->joinedRooms;
                                   userManager_.deleteUser(user->pseudo);
                                   for(auto room: rooms){
@@ -87,6 +89,9 @@ private:
                                 }
                               });
     }
+
+  //with header giving length of str, get and decode body. if new pseudo, change it and send msg
+  //TODO send back msg only if Message::Type::TextMsg
     void readBody(User::Ptr user)
     {
         Message& msg = user->message;
@@ -107,15 +112,13 @@ private:
           else{
             std::cout << "error readBody:" << ec.message() << std::endl;
           }
-                                    readHeader(user);
+          readHeader(user);
         });
     }
 
+  //for each user in msg.room, send msg
     void sendMsg(const Message& msg) {
-      // std::cout << "in send Message\n";
-      // std::cout << "msg room : " << msg.room << std::endl;
         Room::Ptr room = userManager_.roomManager.rooms[msg.room];
-        // std::cout << "after geting room ptr\n";
         if(!room->userList.empty()) {
             for(const std::string& user: room->userList){
               std::cout << "message " << msg.encodedMsg << " broadcast to " << user << std::endl;
@@ -123,8 +126,6 @@ private:
                                        boost::asio::buffer(msg.encodedMsg,
                                                            msg.encodedMsg.size()),
                                        [this](boost::system::error_code ec, std::size_t /*length*/) {
-                                         // if (!ec) {
-                                         // }
                                          if(ec){
                                            std::cout << "error broadcast:" << ec.message() << std::endl;
                                          }

@@ -8,7 +8,7 @@
 #include <memory>
 #include <map>
 
-
+//manager of the rooms, with their list of users
 class RoomManager
 {
 public:

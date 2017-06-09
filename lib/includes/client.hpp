@@ -10,7 +10,7 @@ class Client
     typedef std::deque<Message> messageQueue;
 
 public:
-    
+
     std::string pseudo;
     Client(boost::asio::io_service& io_service,
            tcp::resolver::iterator& endpoint_iterator)
@@ -23,6 +23,7 @@ public:
         io_service_.post([this]() { socket_.close(); });
     }
 
+    // run client only if func ptr set and empty msg sent to get pseudo
     void runClient()
     {
         if(displayMsg_ && displayUsers_) {
@@ -30,7 +31,8 @@ public:
         }
         createMsg("");
     }
-    
+
+    // set func ptr to interact with ui
     void setReadCallback(std::function<void(std::string)> funcMsg,
                          std::function<void(std::vector<std::string>)>funcUsers)
     {
@@ -38,40 +40,38 @@ public:
         displayUsers_ = funcUsers;
         runClient();
     }
-    
+
+    //func called by ui, when getting entry, creating the Message object
     void createMsg(std::string entry)
     {
-        // std::cout << "\nCreate msg with entry: " << entry << std::endl;
-                // if(!entry.empty()) {
-                    if(entry[0] != '/'){
-                        Message msg;
-                        //TODO do by real rooms
-                        msg.room = "default";
-                        msg.sender = pseudo;
-                        msg.bodyLength = entry.size();
-                        msg.msg = entry;
-                        msg.encodeHeader(Message::Type::TEXTMSG);
-                        // std::cout << "Msg created with pseudo :" << msg.sender << " and msg : " << msg.msg << std::endl;
-                        write(msg);
-                    // }
-                }
+        if(entry[0] != '/'){
+            Message msg;
+            //TODO do by real rooms
+            msg.room = "default";
+            msg.sender = pseudo;
+            msg.bodyLength = entry.size();
+            msg.msg = entry;
+            msg.encodeHeader(Message::Type::TEXTMSG);
+            write(msg);
+        }
     }
-    void write(const Message& msg)
-    {
-        // std::cout << "in write, msg: "<< msg.encodedMsg << std::endl;
-        io_service_.post(
-                         [this, msg]() {
-                             bool writeInProgress = !msgQueue_.empty();
-                             msgQueue_.push_back(msg);
-                             // std::cout << "msg post: " << msg.encodedMsg << std::endl;
-                             if (!writeInProgress) {
-                                 sendMsg();
-                             }
-                         });
-    }
-
 
 private:
+
+    //boost post service to send msg
+    void write(const Message& msg)
+    {
+        io_service_.post([this, msg]() {
+            bool writeInProgress = !msgQueue_.empty();
+            msgQueue_.push_back(msg);
+            if (!writeInProgress) {
+                sendMsg();
+            }
+        });
+    }
+
+
+    //connect to server socket
     void connect()
     {
         boost::asio::async_connect(socket_, endpoint_iterator_,
@@ -85,9 +85,9 @@ private:
                                    });
     }
 
+    //getting msg (event in async read), trying to decode header
     void readHeader()
     {
-        // std::cout << "begin read header\n";
         newMsg_.emptyMe();
         boost::asio::async_read(socket_,
                                 boost::asio::buffer(newMsg_.buff, Message::headerLength),
@@ -98,17 +98,16 @@ private:
                                         }
                                         else {
                                             std::cout << "PB DECODE HEADER\n";
-                                            std::cout << "buffer : " << newMsg_.buff << std::endl;
                                         }
                                     }
                                     else {
                                         std::cout << "error readHeader:" << ec.message() << std::endl;
                                         socket_.close();
                                     }
-                                    // std::cout << "end read header\n";
                                 });
     }
 
+    //reading body and decoding body. doing action depending Message::Type
     void readBody()
     {
         // std::cout << "begin read body\n";
@@ -133,9 +132,9 @@ private:
                                         socket_.close();
                                     }
                                 });
-        // std::cout << "end read body\n";
     }
 
+    //send encoded msg to server, from the message queue filled by write()
     void sendMsg()
     {
         boost::asio::async_write(socket_,

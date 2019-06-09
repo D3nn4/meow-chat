@@ -96,24 +96,24 @@ private:
     {
         Message& msg = user->message;
         boost::asio::async_read(
-        user->socket,
-        boost::asio::buffer(msg.body(), msg.bodyLength),
-          [this, user](boost::system::error_code ec, std::size_t) {
-          if(!ec) {
-            user->message.decodeBody();
-            if(user->pseudo.compare(user->message.sender) != 0){
-              userManager_.updateUsername(user->pseudo, user->message.sender);
-              for(auto room: user->joinedRooms){
-                write(userManager_.createUserListMsg(room));
-              }
-            }
-            write(user->message);
-          }
-          else{
-            std::cout << "error readBody:" << ec.message() << std::endl;
-          }
-          readHeader(user);
-        });
+                                user->socket,
+                                boost::asio::buffer(msg.body(), msg.bodyLength),
+                                [this, user](boost::system::error_code ec, std::size_t) {
+                                    if(!ec) {
+                                        user->message.decodeBody();
+                                        if(user->pseudo.compare(user->message.sender) != 0){
+                                            userManager_.updateUsername(user->pseudo, user->message.sender);
+                                            for(auto room: user->joinedRooms){
+                                                write(userManager_.createUserListMsg(room));
+                                            }
+                                        }
+                                        write(user->message);
+                                    }
+                                    else{
+                                        std::cout << "error readBody:" << ec.message() << std::endl;
+                                    }
+                                    readHeader(user);
+                                });
     }
 
   //for each user in msg.room, send msg

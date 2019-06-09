@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     boost::asio::io_service io_service;
 
     tcp::resolver resolver(io_service);
-    auto endpoint_iterator = resolver.resolve({ "127.0.0.1", "8080" });
+    auto endpoint_iterator = resolver.resolve({ "127.0.0.1", "4242" });
     std::thread t;
     {
     Client c(io_service, endpoint_iterator);

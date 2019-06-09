@@ -1,5 +1,6 @@
 #include <string>
 #include "room_manager.hpp"
+#include <iostream>
 #include <memory>
 
 //creation of the default room of the server and the room manager

@@ -31,7 +31,7 @@ UiClient::UiClient(Client &client, QWidget *parent) :
 
     }
     c.pseudo = username.toUtf8().constData();
-    ui->statusBar->showMessage(username);
+    ui->statusBar->showMessage("Username : " + username);
     std::function<void(std::string)> funcMsg= std::bind( &UiClient::display_new_msg, this, _1 );
     std::function<void(std::vector<std::string>)> funcUsers= std::bind( &UiClient::sendSignal, this, _1 );
 

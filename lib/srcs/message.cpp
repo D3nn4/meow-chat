@@ -1,4 +1,5 @@
 #include "message.hpp"
+#include <iostream>
 
 Message::Message()
     :bodyLength(0)
